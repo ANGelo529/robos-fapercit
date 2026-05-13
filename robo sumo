@@ -1,0 +1,66 @@
+from hub import light_matrix, motion_sensor, port
+import runloop
+import motor;
+import distance_sensor
+import force_sensor
+
+#CARRO ANGELO
+MOTOR_ESQ = port.B
+MOTOR_DIR = port.F
+BOTAO = port.A 
+SENSOR_DISTANCIA = port.D
+
+# CARRO GUSTAVO
+# MOTOR_ESQ = port.A
+# MOTOR_DIR = port.E
+# BOTAO = port.A
+# SENSOR_DISTANCIA = port.C
+
+VELOCIDADEBASE = 200;
+
+
+
+def motores(veE, veD):
+    veE = -veE
+    motor.run(MOTOR_DIR, veD)
+    motor.run(MOTOR_ESQ, veE)
+
+def frente(velocidade):
+    motores(velocidade, velocidade)
+
+def parar():
+    motores(0, 0)
+
+async def main():
+    pressao = False
+    distancia = False
+    velocidade = VELOCIDADEBASE
+    velDistPerto = 300
+    velDistMedia = 150
+    velDistAtual = 0
+
+    while True:
+        pressao = force_sensor.pressed(BOTAO)
+        distancia = distance_sensor.distance(SENSOR_DISTANCIA)
+        frente(velocidade)
+
+        if pressao :
+            parar()
+            print("parou")
+            break
+        print(distancia)
+
+        if distancia < 100 :
+            velocidade = -(VELOCIDADEBASE + velDistPerto)
+            velDistAtual = -velDistPerto
+        elif distancia  > 100 and distancia < 200:
+            velocidade = -(VELOCIDADEBASE + velDistMedia)
+            velDistAtual = -velDistMedia
+        else:
+            velocidade = -VELOCIDADEBASE
+            velDistAtual =- VELOCIDADEBASE
+
+        if distancia < 0:
+            velocidade = VELOCIDADEBASE
+
+runloop.run(main())
